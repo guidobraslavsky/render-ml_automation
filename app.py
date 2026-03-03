@@ -23,7 +23,7 @@ def complaint():
     data = request.json
 
     # 🔐 Validación de seguridad
-    if data.get("secret") != SECRET_KEY:
+    if request.headers.get("X-Secret-Key") != SECRET_KEY:
         return jsonify({"error": "Unauthorized"}), 403
 
     message = f"""
