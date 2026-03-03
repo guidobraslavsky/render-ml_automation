@@ -22,6 +22,10 @@ def send_photo(photo_url):
 def complaint():
     data = request.json
 
+    # 👇 DEBUG TEMPORAL
+    print("Header recibido:", request.headers.get("X-Secret-Key"))
+    print("Secret real:", SECRET_KEY)
+
     # 🔐 Validación de seguridad
     if request.headers.get("X-Secret-Key") != SECRET_KEY:
         return jsonify({"error": "Unauthorized"}), 403
