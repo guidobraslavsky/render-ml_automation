@@ -1,1 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reclamos Hogarela</title>
 
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f4f6f9;
+  display: flex;
+  justify-content: center;
+  padding: 30px;
+}
+
+.container {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+input, select, textarea {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 15px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+}
+
+button {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 8px;
+  background: #2563eb;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #1e4ed8;
+}
+
+.success {
+  display: none;
+  text-align: center;
+  margin-top: 15px;
+  color: green;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+<h1>Formulario de Reclamo</h1>
+
+<form id="reclamoForm">
+<input type="text" name="nombre" placeholder="Nombre completo" required>
+<input type="text" name="pedido_ml" placeholder="Número de Pedido ML" required>
+<input type="text" name="contacto" placeholder="Teléfono o Email" required>
+<input type="text" name="producto" placeholder="Producto comprado" required>
+
+<select name="tipo" required>
+<option value="">Seleccionar tipo de problema</option>
+<option value="Producto dañado">Producto dañado</option>
+<option value="Faltante">Faltante</option>
+<option value="Error de envío">Error de envío</option>
+<option value="Otro">Otro</option>
+</select>
+
+<textarea name="descripcion" rows="4" placeholder="Describí el problema" required></textarea>
+
+<button type="submit">Enviar Reclamo</button>
+
+<div class="success" id="successMsg">
+Reclamo enviado correctamente ✅
+</div>
+
+</form>
+</div>
+
+<script>
+document.getElementById("reclamoForm").addEventListener("submit", async function(e) {
+  e.preventDefault();
+
+  const formData = new FormData(this);
+  const data = Object.fromEntries(formData.entries());
+
+  const response = await fetch("/complaint", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Secret-Key": "ml_reclamos_2026_seguro_847291"
+    },
+    body: JSON.stringify(data)
+  });
+
+  if (response.ok) {
+    document.getElementById("successMsg").style.display = "block";
+    this.reset();
+  } else {
+    alert("Error al enviar el reclamo");
+  }
+});
+</script>
+
+</body>
+</html>
