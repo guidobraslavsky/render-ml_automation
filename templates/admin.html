@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Panel Reclamos</title>
+    <style>
+        body {
+            font-family: Arial;
+            padding: 30px;
+            background: #f4f6f9;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background: #2563eb;
+            color: white;
+        }
+
+        .resuelto {
+            color: green;
+            font-weight: bold;
+        }
+
+        .pendiente {
+            color: red;
+            font-weight: bold;
+        }
+
+        a.button {
+            background: #16a34a;
+            color: white;
+            padding: 6px 10px;
+            text-decoration: none;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Panel de Reclamos</h1>
+
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Fecha</th>
+            <th>Pedido</th>
+            <th>Tipo</th>
+            <th>Estado</th>
+            <th>Acción</th>
+        </tr>
+
+        {% for r in reclamos %}
+        <tr>
+            <td>{{ r.id }}</td>
+            <td>{{ r.fecha }}</td>
+            <td>{{ r.pedido_ml }}</td>
+            <td>{{ r.tipo }}</td>
+            <td class="{{ r.estado }}">{{ r.estado }}</td>
+            <td>
+                {% if r.estado == "pendiente" %}
+                <a class="button" href="/admin/resolver/{{ r.id }}">Marcar Resuelto</a>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+
+    </table>
+
+</body>
+
+</html>
