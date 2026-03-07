@@ -1,50 +1,63 @@
-import requests
 import time
-import os
-import database
+import requests
 
-TOKEN_URL = "https://api.mercadolibre.com/oauth/token"
+from config import Config
+from database import get_token, save_token
 
 
 def get_access_token():
 
-    token_data = database.get_token()
+    token_data = get_token()
 
-    if token_data:
+    if not token_data:
+        raise Exception("No hay token guardado en DB")
 
-        access_token = token_data["access_token"]
-        expires_at = token_data["expires_at"]
+    access_token, refresh_token, expires_at = token_data
 
-        if time.time() < expires_at:
-            return access_token
+    try:
+        expires_at = float(expires_at)
+    except (TypeError, ValueError):
+        print("⚠ expires_at inválido, forzando refresh...")
+        return refresh_access_token(refresh_token)
 
-    return refresh_access_token()
+    # renovar si vence en 5 minutos
+    if time.time() > expires_at - 300:
+        return refresh_access_token(refresh_token)
+
+    return access_token
 
 
-def refresh_access_token():
+def refresh_access_token(refresh_token):
 
-    refresh_token = os.environ.get("ML_REFRESH_TOKEN")
+    print("🔄 Renovando access token...")
 
-    payload = {
+    url = "https://api.mercadolibre.com/oauth/token"
+
+    data = {
         "grant_type": "refresh_token",
-        "client_id": os.environ.get("ML_CLIENT_ID"),
-        "client_secret": os.environ.get("ML_CLIENT_SECRET"),
+        "client_id": Config.CLIENT_ID,
+        "client_secret": Config.CLIENT_SECRET,
         "refresh_token": refresh_token,
     }
 
-    r = requests.post(TOKEN_URL, data=payload)
+    response = requests.post(url, data=data)
 
-    if r.status_code != 200:
-        raise Exception("Error obteniendo access token")
+    token_info = response.json()
 
-    data = r.json()
+    if response.status_code != 200:
+        print("❌ Error renovando token:", token_info)
+        raise Exception("No se pudo renovar token")
 
-    access_token = data["access_token"]
-    refresh_token = data["refresh_token"]
-    expires_in = data["expires_in"]
+    new_access_token = token_info["access_token"]
+    new_refresh_token = token_info["refresh_token"]
+    expires_in = token_info["expires_in"]
 
-    expires_at = time.time() + expires_in - 60
+    save_token(
+        access_token=new_access_token,
+        refresh_token=new_refresh_token,
+        expires_at=time.time() + expires_in,
+    )
 
-    database.save_token(access_token, refresh_token, expires_at)
+    print("✅ Token renovado correctamente")
 
-    return access_token
+    return new_access_token
